@@ -1,0 +1,27 @@
+{
+  "name": "@wal-li/core",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wal-li/core.git"
+  },
+  "keywords": [],
+  "author": "HaoVA <hi@haova.me>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wal-li/core/issues"
+  },
+  "homepage": "https://github.com/wal-li/core#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.2.2"
+  }
+}
