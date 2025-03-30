@@ -4,6 +4,7 @@
     "module": "Node18",
     "target": "ES2020",
     "moduleResolution": "NodeNext",
+    "isolatedModules": true,
     "declaration": true,
     "sourceMap": true,
     "esModuleInterop": true,
