@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 /**
  * Checks if the given item is a plain object.
  * A plain object is an object created using `{}`, `new Object()`, or `Object.create(null)`.
@@ -43,4 +45,113 @@ export function merge(target: any, ...sources: any[]) {
   }
 
   return merge(target, ...sources);
+}
+
+/**
+ * Joins multiple path segments into a single path, ensuring a leading slash.
+ * @param args - The path segments to join.
+ * @returns A joined path string.
+ */
+export function joinPath(...args: string[]) {
+  return path.join('/', ...args.map((i) => i.toString()));
+}
+
+/**
+ * Converts a custom path string into a regular expression for matching dynamic routes.
+ * Supports path variables (e.g., "/user/:id") and regex patterns.
+ * @param p - The path string to convert.
+ * @returns A RegExp object to match the given path pattern.
+ */
+export function pathToRegexp(p: string) {
+  const paths = [];
+  let lastPath = '';
+  let isVar = false;
+  let varName = '';
+  let rCount = 0;
+  let rStr = '';
+
+  p += '/';
+
+  for (const c of p) {
+    if (c === '/') {
+      // regexp
+      if (rStr) {
+        lastPath += `(${rStr})`;
+      }
+
+      // add var
+      if (isVar) {
+        lastPath += `(?<${varName}>[^\/]+?)`;
+      }
+
+      // push
+      paths.push(lastPath);
+
+      // reset
+      lastPath = '';
+      varName = '';
+      isVar = false;
+      rStr = '';
+      rCount = 0;
+      continue;
+    }
+
+    // regex mode
+    if (c === '(') {
+      rCount++;
+      if (rCount === 1) continue;
+    }
+
+    if (c === ')') {
+      rCount = Math.max(0, rCount - 1);
+
+      if (rCount === 0 && rStr) {
+        lastPath += `(${rStr})`;
+
+        rStr = '';
+        continue;
+      }
+    }
+
+    if (rCount > 0) {
+      rStr += c;
+      continue;
+    }
+
+    // var mode
+    if (isVar && /[^\w]/.test(c)) {
+      lastPath += `(?<${varName}>[^\/]+?)`;
+
+      isVar = false;
+      varName = '';
+    }
+
+    if (c === ':') {
+      isVar = true;
+      continue;
+    }
+
+    if (isVar) {
+      varName += c;
+      continue;
+    }
+
+    lastPath += c;
+  }
+
+  return new RegExp('^' + joinPath(...paths) + '/{0,1}$');
+}
+
+/**
+ * Parses a query string or URLSearchParams object into a key-value object.
+ * @param query - The query string or URLSearchParams object.
+ * @returns An object containing query parameters as key-value pairs.
+ */
+export function parseQuery(query: URLSearchParams | string) {
+  if (typeof query === 'string') query = new URLSearchParams(query);
+
+  const res: any = {};
+  for (const [key, value] of query) res[key] = value;
+
+  return res;
 }

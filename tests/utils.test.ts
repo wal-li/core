@@ -1,4 +1,4 @@
-import { isPlainObject, merge } from '../src/utils';
+import { isPlainObject, joinPath, merge, parseQuery, pathToRegexp } from '../src/utils';
 
 describe('isPlainObject', () => {
   it('should return true for an empty object', () => {
@@ -90,5 +90,35 @@ describe('merge', () => {
 
     expect(target).toEqual(targetCopy);
     expect(source).toEqual(sourceCopy);
+  });
+});
+
+describe('joinPath', () => {
+  test('joins multiple path segments correctly', () => {
+    expect(joinPath('user', 'profile')).toBe('/user/profile');
+  });
+  test('handles empty segments', () => {
+    expect(joinPath('', 'dashboard')).toBe('/dashboard');
+  });
+});
+
+describe('pathToRegexp', () => {
+  test('matches dynamic paths correctly', () => {
+    const regex = pathToRegexp('/user/:id');
+    expect('/user/123').toMatch(regex);
+  });
+  test('handles paths with regex patterns', () => {
+    const regex = pathToRegexp('/page/(\\d+)');
+    expect('/page/42').toMatch(regex);
+  });
+});
+
+describe('parseQuery', () => {
+  test('parses a query string into an object', () => {
+    expect(parseQuery('name=John&age=30')).toEqual({ name: 'John', age: '30' });
+  });
+  test('parses URLSearchParams correctly', () => {
+    const params = new URLSearchParams('foo=bar&baz=qux');
+    expect(parseQuery(params)).toEqual({ foo: 'bar', baz: 'qux' });
   });
 });

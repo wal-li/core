@@ -45,7 +45,7 @@ npm i -D wal-js
 
 ### Why not using `vitest`?
 
-| Vite uses ESBuild which doesn't support "emitDecoratorMetadata" in tsconfig, since ESBuild doesn't have its own type system implemented. (https://stackoverflow.com/questions/68570519/why-cant-reflect-metadata-be-used-in-vite)
+> Vite uses ESBuild which doesn't support "emitDecoratorMetadata" in tsconfig, since ESBuild doesn't have its own type system implemented. (https://stackoverflow.com/questions/68570519/why-cant-reflect-metadata-be-used-in-vite)
 
 ## License
 
