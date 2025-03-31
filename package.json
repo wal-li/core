@@ -2,6 +2,7 @@
   "name": "@wal-li/core",
   "version": "0.0.1",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "test": "jest --runInBand",
