@@ -1,13 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { Logger } from '../src/logger.js';
+import { Logger } from '../src/logger';
 
 describe('Logger', () => {
   let logger: Logger;
-  let stdoutSpy: any;
+  let stdoutSpy: jest.SpyInstance;
 
   beforeEach(() => {
     logger = new Logger('TestLogger');
-    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    stdoutSpy = jest.spyOn(process.stdout, 'write').mockImplementation();
   });
 
   afterEach(() => {

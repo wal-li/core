@@ -1,11 +1,11 @@
 import { createServer, Server as LegacyServer, IncomingMessage, ServerResponse } from 'node:http';
-import { Inject, Injectable } from './di.js';
-import { Method, MimeType, StatusCode } from './enums.js';
-import { ReasonPhrases } from './constants.js';
-import { Start, Stop } from './decorators.js';
-import { isPlainObject, parseQuery, pathToRegexp } from './utils.js';
-import { Logger } from './logger.js';
-import { colors } from './colors.js';
+import { Inject, Injectable } from './di';
+import { Method, MimeType, StatusCode } from './enums';
+import { ReasonPhrases } from './constants';
+import { Start, Stop } from './decorators';
+import { isPlainObject, parseQuery, pathToRegexp } from './utils';
+import { Logger } from './logger';
+import { colors } from './colors';
 
 const HOST_ENV = 'env.host';
 const PORT_ENV = 'env.port';

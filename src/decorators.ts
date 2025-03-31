@@ -1,5 +1,5 @@
-import { Container } from './di.js';
-import { Method } from './enums.js';
+import { Container } from './di';
+import { Method } from './enums';
 
 // common decorators
 const Start = Container.createDecorator();

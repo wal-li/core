@@ -1,4 +1,4 @@
-import { ColorCode, StatusCode } from './enums.js';
+import { ColorCode, StatusCode } from './enums';
 
 export const ReasonPhrases = {
   [StatusCode.ACCEPTED]: 'Accepted',

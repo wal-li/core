@@ -1,5 +1,5 @@
-import { ColorCodes } from './constants.js';
-import { ColorCode } from './enums.js';
+import { ColorCodes } from './constants';
+import { ColorCode } from './enums';
 
 class BaseColors {
   style(colors: ColorCode[], args: any[]) {

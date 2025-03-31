@@ -1,16 +1,16 @@
 {
   "name": "@wal-li/core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "module",
+  "type": "commonjs",
   "files": [
     "/dist"
   ],
   "scripts": {
     "build": "tsc",
-    "test": "vitest --run",
-    "coverage": "vitest --run --coverage"
+    "test": "jest --runInBand",
+    "coverage": "jest --coverage --runInBand"
   },
   "repository": {
     "type": "git",
@@ -25,14 +25,16 @@
   "homepage": "https://github.com/wal-li/core#readme",
   "description": "Build Secure, Scalable, and Smart Servers with Ease. ",
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.13.14",
-    "@vitest/coverage-v8": "^3.0.9",
     "formidable": "^3.5.2",
+    "jest": "^29.7.0",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "supertest": "^7.1.0",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.9"
+    "ts-jest": "^29.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   },
   "dependencies": {
     "reflect-metadata": "^0.2.2"
