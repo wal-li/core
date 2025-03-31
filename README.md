@@ -28,17 +28,66 @@ If you're using typescript, make sure `tsconfig` is match with this:
 npm i -D @wal-li/core
 ```
 
-or
-
-```bash
-npm i -D wal-js
-```
-
 ## Example
 
 ```ts
+import { Container, Server, Start } from '@wal-li/core';
 
+const container = new Container();
+
+container.register(Server);
+
+container.execute(Start);
+
+const server = container.resolve<Server>(Server);
 ```
+
+## Features
+
+### Dependency Injection
+
+TBD
+
+### Server
+
+TBD
+
+### VM
+
+`Vm` is a class that allows you to create a Node.js virtual environment with basic controls.
+
+```ts
+import { Vm } from '@wal-li/core';
+
+await Vm.execute(
+  `
+  exports.handler = async function({ name }) {
+    return "Hello, " + name + "!";
+  }
+`,
+  { name: 'World' },
+);
+
+// Hello, World
+```
+
+Notes:
+
+- This `Vm` is not a security mechanism. Do not use it to run untrusted code.
+- It is a combination of node:worker_threads (for parallel execution) and vm (for sandboxing).
+- Consider using `isolated-vm` or `docker` to run untrusted code.
+
+Allowed in the global:
+
+- `clearInterval`
+- `clearTimeout`
+- `setInterval`
+- `setTimeout`
+- `structuredClone`
+- `atob`
+- `btoa`
+- `fetch`
+- `crypto`
 
 ## FAQ
 
@@ -48,7 +97,7 @@ npm i -D wal-js
 
 ### Why CommonJS?
 
-Typescript with ESM isn't satisfy requirement of the framework and related products: Jest, Isolated-VM. So, CommonJS.
+TypeScript with ESM doesn't satisfy the requirements of the framework and related products, such as Jest and Isolated-VM. So, CommonJS it is.
 
 ## License
 

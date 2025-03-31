@@ -1,6 +1,6 @@
 {
   "name": "@wal-li/core",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "commonjs",
@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "jest --runInBand",
+    "test": "jest --runInBand --detectOpenHandles",
     "coverage": "jest --coverage --runInBand"
   },
   "repository": {
