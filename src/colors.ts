@@ -1,11 +1,13 @@
-import { ColorCodes } from './constants';
-import { ColorCode } from './enums';
+import { ColorCodes } from './constants.js';
+import { ColorCode } from './enums.js';
 
 class BaseColors {
   style(colors: ColorCode[], args: any[]) {
     let msg = args.join('');
-    for (const colorCode of colors)
+    for (const colorCode of colors) {
+      // @ts-ignore
       msg = ColorCodes[colorCode] ? `\x1b[${ColorCodes[colorCode][0]}m${msg}\x1b[${ColorCodes[colorCode][1]}m` : msg;
+    }
     return msg;
   }
 }

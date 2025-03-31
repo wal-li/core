@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { merge } from './utils';
+import { merge } from './utils.js';
 
 type Constructable<T = {}> = new (...args: any[]) => T;
 

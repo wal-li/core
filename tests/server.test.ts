@@ -1,9 +1,17 @@
+import { describe, expect, test } from 'vitest';
 import request from 'supertest';
 import formidable from 'formidable';
 import { Server as IoServer } from 'socket.io';
 import { io } from 'socket.io-client';
-import { simpleParseForm, Response, Server, ServerPlugin, ApiErrorResponse, ApiSuccessResponse } from '../src/server';
-import { Method } from '../src/enums';
+import {
+  simpleParseForm,
+  Response,
+  Server,
+  ServerPlugin,
+  ApiErrorResponse,
+  ApiSuccessResponse,
+} from '../src/server.js';
+import { Method } from '../src/enums.js';
 
 function checkList(noTasks) {
   let resolve;

@@ -1,6 +1,6 @@
-import { colors } from './colors';
 import { stdout } from 'node:process';
-import { ColorCode } from './enums';
+import { colors } from './colors.js';
+import { ColorCode } from './enums.js';
 
 class Logger {
   /**
