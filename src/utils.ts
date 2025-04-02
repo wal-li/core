@@ -1,6 +1,16 @@
 import path from 'node:path';
 
 /**
+ * Checks if the provided value is an object (excluding arrays and null).
+ *
+ * @param {any} item - The value to be checked.
+ * @returns {boolean} Returns `true` if the item is a non-null object, otherwise `false`.
+ */
+export function isObject(item: any) {
+  return !!item && typeof item === 'object' && !Array.isArray(item);
+}
+
+/**
  * Checks if the given item is a plain object.
  * A plain object is an object created using `{}`, `new Object()`, or `Object.create(null)`.
  *
@@ -9,11 +19,9 @@ import path from 'node:path';
  */
 export function isPlainObject(item: any) {
   return (
-    !!item &&
-    typeof item === 'object' &&
-    !Array.isArray(item) && // not array
-    (Object.getPrototypeOf(item) === Object.prototype || // Check if the object is created by {} or new Object()
-      Object.getPrototypeOf(item) === null) // Check if the object is created by Object.create(null)
+    !!item && // excludes null, undefined
+    typeof item === 'object' && // excludes NaN
+    [undefined, Object, Function].includes(item.constructor) // allows object, Object.create(...) and excludes any Constructor
   );
 }
 
@@ -52,7 +60,7 @@ export function merge(target: any, ...sources: any[]) {
  * @param args - The path segments to join.
  * @returns A joined path string.
  */
-export function joinPath(...args: string[]) {
+export function joinPath(...args: any[]) {
   return path.join('/', ...args.map((i) => i.toString()));
 }
 

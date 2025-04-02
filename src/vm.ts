@@ -23,7 +23,7 @@ function runScript(script: string, contextData: any, timeout = 10000) {
         const context = Object.create({
           exports: { handler: () => {} },
           clearInterval,
-          clearTimeout
+          clearTimeout,
           setInterval,
           setTimeout,
           structuredClone,
