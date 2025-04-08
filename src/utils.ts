@@ -66,88 +66,39 @@ export function joinPath(...args: any[]) {
 
 /**
  * Converts a custom path string into a regular expression for matching dynamic routes.
- * Supports path variables (e.g., "/user/:id") and regex patterns.
- * @param p - The path string to convert.
+ * Supports path variables (e.g., "/user/[id]") and regex patterns.
+ * @param routePath - The path string to convert.
  * @returns A RegExp object to match the given path pattern.
  */
-export function pathToRegexp(p: string) {
-  const paths = [];
-  let lastPath = '';
-  let isVar = false;
-  let varName = '';
-  let rCount = 0;
-  let rStr = '';
+export function pathToRegexp(routePath: string): RegExp {
+  // Normalize route
+  routePath = routePath.trim();
 
-  p += '/';
+  // Remove group segments (e.g., (group))
+  routePath = routePath.replace(/\/\(([^/]+?)\)/g, '');
 
-  for (const c of p) {
-    if (c === '/') {
-      // regexp
-      if (rStr) {
-        lastPath += `(${rStr})`;
-      }
+  // Escape special regex characters
+  let pattern = routePath.replace(/([.+?^=!:${}()|[\]/\\])/g, '\\$1');
 
-      // add var
-      if (isVar) {
-        lastPath += `(?<${varName}>[^\/]+?)`;
-      }
+  // Convert [name] to named capture groups
+  pattern = pattern.replace(/\\\[(\w+?)\\\]/g, (_, key) => {
+    return `(?<${key}>[^/]+)`;
+  });
 
-      // push
-      paths.push(lastPath);
+  // Optional catch-all: [[...param]]
+  pattern = pattern.replace(/\\\/?\\\[\\\[\\\.\\\.\\\.(\w+?)\\\]\\\]/g, (_, key) => {
+    return `(?:\/(?<${key}>.*))?`;
+  });
 
-      // reset
-      lastPath = '';
-      varName = '';
-      isVar = false;
-      rStr = '';
-      rCount = 0;
-      continue;
-    }
+  // Handle catch-all [...slug] by allowing anything after the segment
+  pattern = pattern.replace(/\\\[\\\.\\\.\\\.(\w+?)\\\]/g, (_, key) => {
+    return `(?<${key}>.+)`;
+  });
 
-    // regex mode
-    if (c === '(') {
-      rCount++;
-      if (rCount === 1) continue;
-    }
+  // Special case: allow optional trailing slash
+  pattern = '^' + pattern.replace(/\/+$/, '') + '/?$';
 
-    if (c === ')') {
-      rCount = Math.max(0, rCount - 1);
-
-      if (rCount === 0 && rStr) {
-        lastPath += `(${rStr})`;
-
-        rStr = '';
-        continue;
-      }
-    }
-
-    if (rCount > 0) {
-      rStr += c;
-      continue;
-    }
-
-    // var mode
-    if (isVar && /[^\w]/.test(c)) {
-      lastPath += `(?<${varName}>[^\/]+?)`;
-
-      isVar = false;
-      varName = '';
-    }
-
-    if (c === ':') {
-      isVar = true;
-      continue;
-    }
-
-    if (isVar) {
-      varName += c;
-      continue;
-    }
-
-    lastPath += c;
-  }
-
-  return new RegExp('^' + joinPath(...paths) + '/{0,1}$');
+  return new RegExp(pattern);
 }
 
 /**

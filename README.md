@@ -50,7 +50,19 @@ TBD
 
 ### Server
 
+**Create**
+
 TBD
+
+**Routing**
+
+- Static Routes: `/abc/def.html`.
+- Dynamic Routes: `/abc/[tag]-[group]/[name].[ext]`.
+- Group Routes: `/abc/(group)/def.html` - The `group` segment is ignored, `/abc/def.html` is matched.
+- Catch-all Routes: `/abc/[...slug]` - Everything after the `/abc/` segment is captured in the `slug` variable.
+- Optional Catch-all Routes: `/abc/[[...slug]]` - Everything after the `/abc/` segment is captured in the `slug` variable.
+  - If the path is `/abc`, the `slug` will be `undefined`.
+  - If the path is `/abc/`, the `slug` will be empty (`''`);
 
 ### VM
 
@@ -73,7 +85,7 @@ await Vm.execute(
 
 Notes:
 
-- This `Vm` is not a security mechanism. Do not use it to run untrusted code.
+- This `Vm` is not a security mechanism. **Do not use it to run untrusted code**.
 - It is a combination of node:worker_threads (for parallel execution) and vm (for sandboxing).
 - Consider using `isolated-vm` or `docker` to run untrusted code.
 

@@ -1,7 +1,74 @@
 import { joinPath, merge, pathToRegexp, parseQuery, isPlainObject, isObject } from '../src/utils';
 
 describe('Utils test', () => {
-  test('merge', async () => {
+  it('should join path', async () => {
+    expect(joinPath(1, 2, 3)).toEqual('/1/2/3');
+    expect(joinPath('a', '/', 'b')).toEqual('/a/b');
+    expect(joinPath('/', 'a', '/', 'b')).toEqual('/a/b');
+  });
+
+  it('should parse query', async () => {
+    const query = parseQuery('foo[0][xyz][ghi]=bar&foo[1]=abc');
+    expect(query).toEqual({ 'foo[0][xyz][ghi]': 'bar', 'foo[1]': 'abc' });
+  });
+});
+
+describe('merge', () => {
+  it('should returns target when no sources are provided', () => {
+    const target = { a: 1 };
+    expect(merge(target)).toEqual({ a: 1 });
+  });
+
+  it('should merges plain objects correctly', () => {
+    const target = { a: 1 };
+    const source = { b: 2 };
+    expect(merge(target, source)).toEqual({ a: 1, b: 2 });
+  });
+
+  it('should deep merges nested objects', () => {
+    const target = { a: { b: 1 } };
+    const source = { a: { c: 2 } };
+    expect(merge(target, source)).toEqual({ a: { b: 1, c: 2 } });
+  });
+
+  it('should merges arrays by concatenation', () => {
+    const target = { a: [1] };
+    const source = { a: [2, 3] };
+    expect(merge(target, source)).toEqual({ a: [1, 2, 3] });
+  });
+
+  it('should merges multiple sources sequentially', () => {
+    const target = { a: 1 };
+    const source1 = { b: 2 };
+    const source2 = { c: 3 };
+    expect(merge(target, source1, source2)).toEqual({ a: 1, b: 2, c: 3 });
+  });
+
+  it('should throws if trying to merge object into non-object', () => {
+    const target = { a: 1 };
+    const source = { a: { b: 2 } }; // trying to merge object into number
+    expect(() => merge(target, source)).toThrow('Cannot merge source object with target in a');
+  });
+
+  it('should throws if trying to merge array into non-array', () => {
+    const target = { a: 1 };
+    const source = { a: [1, 2] }; // trying to merge array into number
+    expect(() => merge(target, source)).toThrow('Cannot merge source array with target in a');
+  });
+
+  it('should creates new objects/arrays if not present in target', () => {
+    const target: any = {};
+    const source = {
+      obj: { a: 1 },
+      arr: [1, 2],
+    };
+    expect(merge(target, source)).toEqual({
+      obj: { a: 1 },
+      arr: [1, 2],
+    });
+  });
+
+  it('should merge', async () => {
     expect(merge({ a: 1, c: { d: 1 } }, { a: 2, b: [1, 2] }, { b: [3] }, { c: { d: 2 } })).toEqual({
       a: 2,
       b: [1, 2, 3],
@@ -16,38 +83,54 @@ describe('Utils test', () => {
       'Cannot merge source object with target in d',
     );
   });
+});
 
-  test('join path', async () => {
-    expect(joinPath(1, 2, 3)).toEqual('/1/2/3');
-    expect(joinPath('a', '/', 'b')).toEqual('/a/b');
-    expect(joinPath('/', 'a', '/', 'b')).toEqual('/a/b');
+describe('pathToRegexp', () => {
+  it('should handle static routes', () => {
+    expect('/abc/def.html').toMatch(pathToRegexp('/abc/def.html'));
+    expect('/abc/def').not.toMatch(pathToRegexp('/abc/def.html'));
+    expect('/abc/def.html/ghi.html').not.toMatch(pathToRegexp('/abc/def.html'));
   });
 
-  test('path to regex', async () => {
-    expect('/').toMatch(pathToRegexp('/'));
-    expect('/abc').toMatch(pathToRegexp('/abc'));
+  it('should handle dynamic routes', () => {
+    expect('/abc/red-blue/image.png'.match(pathToRegexp('/abc/[tag]-[group]/[name].[ext]'))?.groups).toEqual({
+      tag: 'red',
+      group: 'blue',
+      name: 'image',
+      ext: 'png',
+    });
+
+    expect('/abc/def.html').not.toMatch(pathToRegexp('/abc[slug]'));
+  });
+
+  it('should handle group routes', () => {
+    expect('/abc/def.html').toMatch(pathToRegexp('/abc/(group)/def.html'));
+    expect('/abc/group/def.html').not.toMatch(pathToRegexp('/abc/(group)/def.html'));
+
+    expect('/abc//def.html').not.toMatch(pathToRegexp('/abc/(group)/def.html'));
+  });
+
+  it('should Catch-all routes', () => {
+    expect('/abc/a/b/c'.match(pathToRegexp('/abc/[...slug]'))?.groups).toEqual({ slug: 'a/b/c' });
+    expect('/abc/a/b/c'.match(pathToRegexp('/abc[...slug]'))?.groups).toEqual({ slug: '/a/b/c' });
+    expect('/abc-a/b/c'.match(pathToRegexp('/abc[...slug]'))?.groups).toEqual({ slug: '-a/b/c' });
+
+    expect('/abc/def/'.match(pathToRegexp('/abc/[[...slug]]'))?.groups).toEqual({ slug: 'def/' });
+    expect('/abc/'.match(pathToRegexp('/abc/[[...slug]]'))?.groups).toEqual({ slug: '' });
+    expect('/abc'.match(pathToRegexp('/abc/[[...slug]]'))?.groups).toEqual({ slug: undefined });
+
+    expect('/abc').not.toMatch(pathToRegexp('/abc/[...slug]'));
+  });
+
+  it('should handle optional trailing slash', () => {
+    expect('').toMatch(pathToRegexp(''));
+    expect('').toMatch(pathToRegexp('/'));
+    expect('/').toMatch(pathToRegexp(''));
+    expect('///').toMatch(pathToRegexp('///'));
+
     expect('/abc').toMatch(pathToRegexp('/abc/'));
-    expect('/abc/').toMatch(pathToRegexp('/abc'));
     expect('/abc/').toMatch(pathToRegexp('/abc/'));
-    expect('/abc').toMatch(pathToRegexp('/:id'));
-    expect('/next-abc.html').toMatch(pathToRegexp('/next-:id.html'));
-    expect('/ab:cd').toMatch(pathToRegexp('/a(.:.)d'));
-    expect('/ab:c').toMatch(pathToRegexp('/a(.:.'));
-
-    expect(pathToRegexp('/:id').exec('/abc')?.groups).toHaveProperty('id', 'abc');
-    expect(pathToRegexp('/next-:id.html').exec('/next-abc.html')?.groups).toHaveProperty('id', 'abc');
-    expect(pathToRegexp('/a(.:.)d').exec('/ab:cd')).toHaveProperty('1', 'b:c');
-    expect(pathToRegexp('/a(?<msg>.:.)d').exec('/ab:cd')?.groups).toHaveProperty('msg', 'b:c');
-
-    expect('').not.toMatch(pathToRegexp('/'));
-    expect('/').not.toMatch(pathToRegexp('/abc'));
-    expect('/abc').not.toMatch(pathToRegexp('/'));
-    expect('/abc/def').not.toMatch(pathToRegexp('/:id'));
-  });
-
-  test('parse query', async () => {
-    const query = parseQuery('foo[0][xyz][ghi]=bar&foo[1]=abc');
-    expect(query).toEqual({ 'foo[0][xyz][ghi]': 'bar', 'foo[1]': 'abc' });
+    expect('/abc/').toMatch(pathToRegexp('/abc'));
   });
 });
 

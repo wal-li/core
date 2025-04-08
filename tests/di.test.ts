@@ -1,7 +1,7 @@
 import { Container, Inject, Injectable } from '../src/di';
 
 describe('Dependency Injection test', () => {
-  test('how inheritance works?', async () => {
+  it('should inheritance', async () => {
     function Human() {}
     function Engineer() {}
 
@@ -16,7 +16,7 @@ describe('Dependency Injection test', () => {
     expect(Object.getPrototypeOf(Engineer.prototype)).toBe(Human.prototype);
   });
 
-  test('create decorator', async () => {
+  it('should create decorator', async () => {
     const DEFAULT_METADATA = Symbol();
 
     const HookClass = Container.createDecorator(DEFAULT_METADATA);
@@ -48,7 +48,7 @@ describe('Dependency Injection test', () => {
     expect(Container.getMetadata('design:paramtypes', SomeClass, 'log')[0]).toEqual(ParentClass);
   });
 
-  test('inheritance di', async () => {
+  it('should inheritance di', async () => {
     @Injectable()
     class Abc {
       protected msg;
@@ -87,7 +87,7 @@ describe('Dependency Injection test', () => {
     expect(container.resolve<Abc>(Abc).print()).toEqual('abc');
   });
 
-  test('runtime decorator', async () => {
+  it('should have runtime decorator', async () => {
     const Abc = class {
       constructor(public data: string) {}
     };
@@ -105,7 +105,7 @@ describe('Dependency Injection test', () => {
     expect(abc.data).toEqual('abc');
   });
 
-  test('constructable', async () => {
+  it('should be constructable', async () => {
     class A {}
 
     expect(Container.isConstructable(A)).toBe(true);
@@ -120,7 +120,7 @@ describe('Dependency Injection test', () => {
     expect(Container.isConstructable(() => {})).toBe(false);
   });
 
-  test('function', async () => {
+  it('should be function', async () => {
     class A {}
 
     expect(Container.isFunction(A)).toBe(false);
@@ -135,7 +135,7 @@ describe('Dependency Injection test', () => {
     expect(Container.isFunction(() => {})).toBe(true);
   });
 
-  test('register & resolve', async () => {
+  it('should register & resolve', async () => {
     @Injectable()
     class B {
       first: string;
@@ -170,7 +170,7 @@ describe('Dependency Injection test', () => {
     expect(container.resolve(A)).toStrictEqual(container.resolve(A));
   });
 
-  test('inject error', async () => {
+  it('should inject error', async () => {
     @Injectable()
     class A {
       msg: string;
@@ -192,7 +192,7 @@ describe('Dependency Injection test', () => {
     expect(() => container.resolve(C)).toThrow('C is not injectable.');
   });
 
-  test('circular error', async () => {
+  it('should throw circular error', async () => {
     @Injectable()
     class Foo {
       constructor(@Inject('Bar') bar) {}
@@ -210,7 +210,7 @@ describe('Dependency Injection test', () => {
     expect(() => container.resolve(Bar)).toThrow(`Circular dependencies dection at Bar > Foo > Bar > Foo`);
   });
 
-  test('execute', async () => {
+  it('should execute', async () => {
     const Flow = Container.createDecorator();
 
     @Injectable()
@@ -247,7 +247,7 @@ describe('Dependency Injection test', () => {
     expect(container.resolve<A>(A).msg).toBe('bparentbeginend');
   });
 
-  test('interface register', async () => {
+  it('should be interface register', async () => {
     interface CalcService {
       add(x: number, y: number): number;
     }
@@ -267,7 +267,7 @@ describe('Dependency Injection test', () => {
     expect(calcService.add(1, 1)).toEqual(2);
   });
 
-  test('di without decorator', async () => {
+  it('should do di without decorator', async () => {
     class A {
       public name: string = 'a';
     }
@@ -288,7 +288,7 @@ describe('Dependency Injection test', () => {
     expect(container.resolve<B>(B).msg()).toEqual('Hello b -> a');
   });
 
-  test('mock components', async () => {
+  it('should mock components', async () => {
     // normal register
     @Injectable()
     class clsA {

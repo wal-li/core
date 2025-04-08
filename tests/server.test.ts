@@ -22,7 +22,7 @@ function checkList(noTasks) {
 }
 
 describe('Server test', () => {
-  test('Response', async () => {
+  it('should Response', async () => {
     expect(new Response()).toHaveProperty('status', 404);
     expect(new Response()).toHaveProperty('body', 'Not Found');
     expect(new Response(301, undefined, { Location: 'https://www.haova.me' }).headers).toHaveProperty('location', [
@@ -30,7 +30,7 @@ describe('Server test', () => {
     ]);
   });
 
-  test('Normal server', async () => {
+  it('should be a Normal server', async () => {
     const server = new Server();
 
     server.addRoute(Method.GET, '/', () => {
@@ -46,7 +46,7 @@ describe('Server test', () => {
     await server.stop();
   });
 
-  test('Use plugin', async () => {
+  it('should use plugin', async () => {
     const server = new Server('0.0.0.0', 8080);
 
     server.use(new ServerPlugin());
@@ -55,7 +55,7 @@ describe('Server test', () => {
     await server.stop();
   });
 
-  test('Rest server', async () => {
+  it('should be a rest server', async () => {
     const server = new Server('0.0.0.0', 8080);
 
     server.use(simpleParseForm);
@@ -97,7 +97,7 @@ describe('Server test', () => {
     await server.stop();
   });
 
-  test('Formidable server', async () => {
+  it('should be a formidable server', async () => {
     const server = new Server('0.0.0.0', 8080);
 
     server.use(
@@ -126,7 +126,7 @@ describe('Server test', () => {
     await server.stop();
   });
 
-  test('request header', async () => {
+  it('should request header', async () => {
     const server = new Server('0.0.0.0', 8080);
 
     server.addRoute(Method.GET, '/', ({ headers }) => {
@@ -143,7 +143,7 @@ describe('Server test', () => {
     await server.stop();
   });
 
-  test('integrate with socket io', async () => {
+  it('should integrate with socket io', async () => {
     const server = new Server('0.0.0.0', 8080);
     const ioServer = new IoServer();
     const task = checkList(2);
@@ -166,7 +166,7 @@ describe('Server test', () => {
     await server.stop();
   });
 
-  test('Server exception', async () => {
+  it('should throw server exception', async () => {
     const server = new Server('0.0.0.0', 8080);
 
     server.use(

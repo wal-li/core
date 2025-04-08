@@ -6,14 +6,14 @@ import { Worker } from 'worker_threads';
  * If the script execution exceeds the specified timeout, the operation is aborted.
  *
  * @param {string} script - The script to be executed in the VM context.
- * @param {any} contextData - The data to be provided to the script's execution context.
+ * @param {any} [contextData={}] - The data to be provided to the script's execution context. Default is `{}`.
  * @param {number} [timeout=10000] - The maximum time (in milliseconds) to allow the script to run before timing out. Default is 10000ms (10 seconds).
  *
  * @returns {Promise<any>} A promise that resolves with the result of the script execution or rejects with an error.
  *
  * @throws {Error} Throws an error if the worker encounters an error, if the script execution exceeds the timeout, or if the worker exits with a non-zero exit code.
  */
-function runScript(script: string, contextData: any, timeout = 10000) {
+function runScript(script: string, contextData: any = {}, timeout = 10000) {
   return new Promise((resolve, reject) => {
     const worker = new Worker(
       `
@@ -29,8 +29,7 @@ function runScript(script: string, contextData: any, timeout = 10000) {
           structuredClone,
           atob,
           btoa,
-          fetch,
-          crypto
+          fetch
         });
         
         vm.createContext(context);
