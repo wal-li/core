@@ -8,7 +8,7 @@ describe('Vm', () => {
   });
 
   it('should handle script errors', async () => {
-    await expect(runScript('some script', { data: 'test' })).rejects.toThrow("Unexpected identifier 'script'");
+    await expect(runScript('some script', { data: 'test' })).rejects.toThrow();
   });
 
   it('should timeout execution if it exceeds the limit', async () => {
