@@ -6,6 +6,7 @@ import { Worker } from 'worker_threads';
  * If the script execution exceeds the specified timeout, the operation is aborted.
  *
  * @param {string} script - The script to be executed in the VM context.
+ * @param {string} method - The method to be executed in exports.
  * @param {any} [contextData={}] - The data to be provided to the script's execution context. Default is `{}`.
  * @param {number} [timeout=10000] - The maximum time (in milliseconds) to allow the script to run before timing out. Default is 10000ms (10 seconds).
  *
@@ -13,7 +14,7 @@ import { Worker } from 'worker_threads';
  *
  * @throws {Error} Throws an error if the worker encounters an error, if the script execution exceeds the timeout, or if the worker exits with a non-zero exit code.
  */
-function runScript(script: string, contextData: any = {}, timeout = 10000) {
+function runScript(script: string, method: string, contextData: any = {}, timeout = 10000) {
   return new Promise((resolve, reject) => {
     const worker = new Worker(
       `
@@ -21,10 +22,8 @@ function runScript(script: string, contextData: any = {}, timeout = 10000) {
         const { parentPort, workerData } = require("node:worker_threads");
 
         const context = Object.create({
-          exports: { handler: () => {} },
-          clearInterval,
+          exports: {},
           clearTimeout,
-          setInterval,
           setTimeout,
           structuredClone,
           atob,
@@ -36,11 +35,15 @@ function runScript(script: string, contextData: any = {}, timeout = 10000) {
 
         vm.runInContext(workerData.script, context);
 
-        Promise.resolve(context.exports.handler(workerData.contextData))
-          .then(data => parentPort.postMessage(['success', data]))
-          .catch(err => parentPort.postMessage(['error', err]));
+        if (!context.exports[workerData.method]) {
+          parentPort.postMessage(['success', undefined]);
+        } else {
+          Promise.resolve(context.exports[workerData.method](workerData.contextData))
+            .then(data => parentPort.postMessage(['success', data]))
+            .catch(err => parentPort.postMessage(['error', err]));
+        }
       `,
-      { eval: true, workerData: { script, contextData } },
+      { eval: true, workerData: { method, script, contextData } },
     );
 
     const timer = setTimeout(() => {

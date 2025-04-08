@@ -2,13 +2,13 @@ import { runScript } from '../src/vm';
 
 describe('Vm', () => {
   it('should execute script successfully', async () => {
-    const result = await runScript('exports.handler = ({ data }) => data;', { data: 'test' });
+    const result = await runScript('exports.handler = ({ data }) => data;', 'handler', { data: 'test' });
 
     expect(result).toBe('test');
   });
 
   it('should handle script errors', async () => {
-    await expect(runScript('some script', { data: 'test' })).rejects.toThrow();
+    await expect(runScript('some script', 'handler', { data: 'test' })).rejects.toThrow();
   });
 
   it('should timeout execution if it exceeds the limit', async () => {
@@ -16,6 +16,7 @@ describe('Vm', () => {
     await expect(
       runScript(
         'exports.handler = async () => await new Promise((resolve) => setTimeout(resolve, 1000));',
+        'handler',
         {},
         timeout,
       ),

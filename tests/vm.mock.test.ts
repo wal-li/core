@@ -34,7 +34,7 @@ describe('Vm Mock', () => {
       }
     });
 
-    const result = await runScript('some script', { data: 'test' });
+    const result = await runScript('some script', 'handler', { data: 'test' });
 
     expect(result).toBe('Executed successfully');
     expect(workerMock.terminate).not.toHaveBeenCalled();
@@ -48,7 +48,7 @@ describe('Vm Mock', () => {
       }
     });
 
-    await expect(runScript('some script', { data: 'test' })).rejects.toThrow('Execution failed');
+    await expect(runScript('some script', 'handler', { data: 'test' })).rejects.toThrow('Execution failed');
   });
 
   it('should timeout execution if it exceeds the limit', async () => {
@@ -60,7 +60,9 @@ describe('Vm Mock', () => {
     });
 
     const timeout = 100; // Set a shorter timeout for the test
-    await expect(runScript('some script', { data: 'test' }, timeout)).rejects.toThrow('Code execution timed out');
+    await expect(runScript('some script', 'handler', { data: 'test' }, timeout)).rejects.toThrow(
+      'Code execution timed out',
+    );
   });
 
   it('should terminate worker if the script exceeds the timeout', async () => {
@@ -73,7 +75,9 @@ describe('Vm Mock', () => {
       }
     });
 
-    await expect(runScript('some script', { data: 'test' }, timeout)).rejects.toThrow('Code execution timed out');
+    await expect(runScript('some script', 'handler', { data: 'test' }, timeout)).rejects.toThrow(
+      'Code execution timed out',
+    );
 
     expect(workerMock.terminate).toHaveBeenCalled();
   });
@@ -86,7 +90,9 @@ describe('Vm Mock', () => {
       }
     });
 
-    await expect(runScript('some script', { data: 'test' })).rejects.toThrow('Worker stopped with exit code 1');
+    await expect(runScript('some script', 'handler', { data: 'test' })).rejects.toThrow(
+      'Worker stopped with exit code 1',
+    );
   });
 
   it('should resolve if worker exits with a zero code', async () => {
@@ -97,6 +103,6 @@ describe('Vm Mock', () => {
       }
     });
 
-    await expect(runScript('some script', { data: 'test' })).resolves.toBe(undefined);
+    await expect(runScript('some script', 'handler', { data: 'test' })).resolves.toBe(undefined);
   });
 });
