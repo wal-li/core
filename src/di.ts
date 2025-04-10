@@ -143,6 +143,24 @@ class Container {
   private resolveTokenStack: InjectionToken[] = [];
 
   /**
+   *
+   * @param name Controller name
+   */
+  constructor(name?: string) {
+    // load all environment variables under prefix `NAME_` to '@.'.
+    if (name) {
+      for (const envName in process.env) {
+        const lowerEnvName = envName.toLowerCase();
+        if (lowerEnvName.indexOf(name.toLowerCase() + '_') === 0) {
+          this.register(`@.${lowerEnvName.substring(name.length + 1)}`, process.env[envName]);
+        }
+      }
+
+      this.register(`@.name`, name);
+    }
+  }
+
+  /**
    * Registers a provider with an injection token in the container.
    *
    * @param token - The injection token, which can be a string, symbol, or constructor function.
