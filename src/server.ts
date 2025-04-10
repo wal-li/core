@@ -1,4 +1,10 @@
-import { createServer, Server as LegacyServer, IncomingMessage, ServerResponse } from 'node:http';
+import {
+  createServer as createHttpServer,
+  Server as LegacyHttpServer,
+  IncomingMessage,
+  ServerResponse,
+} from 'node:http';
+import { createServer as createHttpsServer, Server as LegacyHttpsServer } from 'node:https';
 import { Inject, Injectable } from './di';
 import { Method, MimeType, StatusCode } from './enums';
 import { ReasonPhrases } from './constants';
@@ -7,8 +13,11 @@ import { isPlainObject, parseQuery, pathToRegexp } from './utils';
 import { Logger } from './logger';
 import { colors } from './colors';
 
-const HOST_ENV = 'env.host';
-const PORT_ENV = 'env.port';
+const HOST_ENV = '@.host';
+const PORT_ENV = '@.port';
+const PROTOCOL_ENV = '@.protocol';
+const KEY_ENV = '@.key';
+const CERT_ENV = '@.cert';
 
 type Route = {
   method: Method;
@@ -180,26 +189,35 @@ class Server {
 
   public host: string;
   public port: number;
+  public protocol: string;
 
   public logger: Logger = new Logger('server');
-  public legacyServer: LegacyServer;
+  public legacyServer!: LegacyHttpServer | LegacyHttpsServer;
 
   /**
    * Initializes the server with an optional host and port.
    * These values are injected using dependency injection,
    * allowing them to be set from environment variables.
    *
-   * @param host - The server host (optional).
    * @param port - The server port (optional).
+   * @param host - The server host (optional).
    */
   constructor(
     @Inject(HOST_ENV, { undefined: true }) host?: string,
     @Inject(PORT_ENV, { undefined: true }) port?: number,
+    @Inject(PROTOCOL_ENV, { undefined: true }) protocol?: string,
+    @Inject(KEY_ENV, { undefined: true }) key?: string,
+    @Inject(CERT_ENV, { undefined: true }) cert?: string,
   ) {
-    this.host = host ?? '127.0.0.1';
     this.port = port ?? 0;
+    this.host = host ?? '127.0.0.1';
+    this.protocol = protocol ?? 'http';
 
-    this.legacyServer = createServer(this.serverCallback.bind(this));
+    if (this.protocol === 'https') {
+      this.legacyServer = createHttpsServer({ key, cert }, this.serverCallback.bind(this));
+    } else {
+      this.legacyServer = createHttpServer(this.serverCallback.bind(this));
+    }
   }
 
   /**
@@ -401,7 +419,7 @@ class Server {
   }
 
   get address() {
-    return `http://${this.host}:${this.port}`;
+    return `${this.protocol}://${this.host}:${this.port}`;
   }
 
   /**
@@ -463,6 +481,8 @@ class Server {
   stop() {
     return new Promise<void>((resolve) => {
       if (!this.isRunning) return resolve();
+
+      this.legacyServer.closeAllConnections();
 
       this.legacyServer.close(() => {
         this.isRunning = false;

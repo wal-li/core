@@ -12,6 +12,8 @@ import {
   httpLogger,
 } from '../src/server';
 import { Method } from '../src/enums';
+import { Container } from '../src/di';
+import { readFileSync } from 'node:fs';
 
 function checkList(noTasks) {
   let resolve;
@@ -30,7 +32,7 @@ function checkList(noTasks) {
 }
 
 describe('Server test', () => {
-  it('should Response', async () => {
+  it('should response', async () => {
     expect(new Response()).toHaveProperty('status', 404);
     expect(new Response()).toHaveProperty('body', 'Not Found');
     expect(new Response(301, undefined, { Location: 'https://www.haova.me' }).headers).toHaveProperty('location', [
@@ -38,7 +40,7 @@ describe('Server test', () => {
     ]);
   });
 
-  it('should be a Normal server', async () => {
+  it('should be a normal server', async () => {
     const server = new Server();
 
     server.addRoute(Method.GET, '/', () => {
@@ -317,6 +319,30 @@ describe('Server test', () => {
     const res = await request(server.address).get('/foo');
     expect(res).toHaveProperty('text', 'this');
 
+    await server.stop();
+  });
+
+  it('should di server', async () => {
+    process.env['TEST_HOST'] = '0.0.0.0';
+    process.env['TEST_PORT'] = '8080';
+
+    const container = new Container('test');
+
+    const server: Server = container.resolve(Server);
+    expect(server.address).toEqual('http://0.0.0.0:8080');
+  });
+
+  it('should create a https server', async () => {
+    const key = readFileSync('./tests/fixtures/key.pem').toString();
+    const cert = readFileSync('./tests/fixtures/cert.pem').toString();
+
+    const server = new Server('localhost', 8000, 'https', key, cert);
+
+    server.addRoute(Method.GET, '/', () => {
+      return 'hello, world';
+    });
+
+    await server.start();
     await server.stop();
   });
 });
