@@ -50,14 +50,14 @@ class Response {
   public headers: HeaderMap = new HeaderMap();
 
   constructor(public status?: StatusCode, public body?: any, headers?: any) {
-    if (this.status === undefined) this.status = this.body === undefined ? StatusCode.NOT_FOUND : StatusCode.OK;
-
-    if (this.status !== undefined && this.body === undefined) this.body = ReasonPhrases[this.status];
-
     if (this.body instanceof Error) {
       this.status ??= StatusCode.INTERNAL_SERVER_ERROR;
       this.body = body.message;
     }
+
+    if (this.status === undefined) this.status = this.body === undefined ? StatusCode.NOT_FOUND : StatusCode.OK;
+
+    if (this.status !== undefined && this.body === undefined) this.body = ReasonPhrases[this.status];
 
     if (isPlainObject(body) || Array.isArray(body)) {
       this.body = JSON.stringify(body);

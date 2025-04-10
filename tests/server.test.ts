@@ -2,7 +2,15 @@ import request from 'supertest';
 import formidable from 'formidable';
 import { Server as IoServer } from 'socket.io';
 import { io } from 'socket.io-client';
-import { simpleParseForm, Response, Server, ServerPlugin, ApiErrorResponse, ApiSuccessResponse } from '../src/server';
+import {
+  simpleParseForm,
+  Response,
+  Server,
+  ServerPlugin,
+  ApiErrorResponse,
+  ApiSuccessResponse,
+  httpLogger,
+} from '../src/server';
 import { Method } from '../src/enums';
 
 function checkList(noTasks) {
@@ -46,6 +54,18 @@ describe('Server test', () => {
     await server.stop();
   });
 
+  it('should catch error when server starting error', async () => {
+    const server = new Server('0.0.0.0', 8080);
+
+    await server.start();
+
+    await expect(new Server('0.0.0.0', 8080).start()).rejects.toThrow(
+      'listen EADDRINUSE: address already in use 0.0.0.0:8080',
+    );
+
+    await server.stop();
+  });
+
   it('should use plugin', async () => {
     const server = new Server('0.0.0.0', 8080);
 
@@ -58,6 +78,7 @@ describe('Server test', () => {
   it('should be a rest server', async () => {
     const server = new Server('0.0.0.0', 8080);
 
+    server.use(httpLogger);
     server.use(simpleParseForm);
 
     server.addRoute(Method.GET, '/', () => {
@@ -93,6 +114,39 @@ describe('Server test', () => {
 
     const res5 = await request(server.address).post('/form').send('abcdef');
     expect(res5).toHaveProperty('body', { msg: 'hello, undefined' });
+
+    await server.stop();
+  });
+
+  it('should handle wrong json post', async () => {
+    const server = new Server('0.0.0.0', 8080);
+
+    server.use(
+      new ServerPlugin({
+        error(ins) {
+          if (ins.error instanceof Response) {
+            ins.output = ins.error;
+          } else if (ins.error instanceof Error) {
+            ins.output = new ApiErrorResponse('INTERNAL_SERVER_ERROR', ins.error.message);
+          }
+        },
+      }),
+    );
+    server.use(simpleParseForm);
+
+    server.addRoute(Method.POST, '/form', ({ fields }) => {
+      return {
+        msg: `hello, ${fields.name}`,
+      };
+    });
+
+    await server.start();
+
+    const res = await request(server.address)
+      .post('/form')
+      .set('content-type', 'application/json; charset=utf-8')
+      .send(`{"foo:bar}`);
+    expect(res.body).toHaveProperty('error');
 
     await server.stop();
   });
@@ -143,6 +197,26 @@ describe('Server test', () => {
     await server.stop();
   });
 
+  it('should catch-all', async () => {
+    const server = new Server('0.0.0.0', 8080);
+
+    server.addRoute(Method.GET, '/foo/[[...bar]]', ({ params }) => {
+      return {
+        bar: params.bar,
+      };
+    });
+
+    await server.start();
+
+    const res = await request(server.address).get('/foo');
+    expect(res).toHaveProperty('body', { bar: undefined });
+
+    const res2 = await request(server.address).get('/foo/a/b/c');
+    expect(res2).toHaveProperty('body', { bar: 'a/b/c' });
+
+    await server.stop();
+  });
+
   it('should integrate with socket io', async () => {
     const server = new Server('0.0.0.0', 8080);
     const ioServer = new IoServer();
@@ -167,6 +241,24 @@ describe('Server test', () => {
   });
 
   it('should throw server exception', async () => {
+    const server = new Server('0.0.0.0', 8080);
+
+    // simple error handle
+    server.addRoute(Method.GET, '/throw-error', ({}) => {
+      return new Response(undefined, new Error(`Error message`));
+    });
+
+    await server.start();
+
+    // simple error
+    let res = await request(server.address).get('/throw-error');
+    expect(res.text).toEqual('Error message');
+    expect(res).toHaveProperty('status', 500);
+
+    await server.stop();
+  });
+
+  it('should throw server exception via plugin', async () => {
     const server = new Server('0.0.0.0', 8080);
 
     server.use(
@@ -201,6 +293,29 @@ describe('Server test', () => {
     res = await request(server.address).get('/throw-success');
     expect(res.body).toHaveProperty('data', 'ok');
     expect(res).toHaveProperty('status', 200);
+
+    await server.stop();
+  });
+
+  it('should not response when already write', async () => {
+    const server = new Server('0.0.0.0', 8080);
+
+    server.use(
+      new ServerPlugin({
+        after(input) {
+          input.output = undefined;
+        },
+      }),
+    );
+
+    server.addRoute(Method.GET, '/foo', ({ res }) => {
+      return 'this';
+    });
+
+    await server.start();
+
+    const res = await request(server.address).get('/foo');
+    expect(res).toHaveProperty('text', 'this');
 
     await server.stop();
   });
