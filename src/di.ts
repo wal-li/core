@@ -253,8 +253,9 @@ class Container {
     else currentItem.value = currentItem.provider;
 
     // fallback
-    if (!currentItem.options.undefined && currentItem.value === undefined)
+    if (!currentItem.options.undefined && currentItem.value === undefined) {
       throw new Error(`${tokenPath} wasn't injected`);
+    }
 
     return currentItem.value;
   }
