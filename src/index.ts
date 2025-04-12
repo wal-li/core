@@ -8,5 +8,6 @@ export * from './decorators';
 
 export * from './controller';
 export * from './logger';
+export * from './security';
 export * from './server';
 export * from './vm';

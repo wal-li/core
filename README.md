@@ -48,6 +48,44 @@ const server = container.resolve<Server>(Server);
 
 TBD
 
+### Security
+
+**ID Generator**
+
+As computational power increases, random IDs tend to become longer to enhance security. However, this does not guarantee protection. Random IDs can still be exposed through various risks, and once compromised, they are difficult to secure again. Therefore, random IDs are not always necessary, especially for internal systems.
+
+Sequential IDs provide several advantages over random ones. Although they are predictable, we can protect them through additional mechanisms such as passwords, encrypted keys, or access tokens.
+
+- Short and compact
+- Naturally sortable
+
+With proper design, sequential IDs can be used safely in distributed systems without collisions, using techniques like unique machine identifiers, timestamps, or sequence generators.
+
+In `@wal-li/core`, we use a 64-bit sequential ID, defined as follows:
+
+```
+[ 1-bit  ][ 42-bit  ][  10-bit  ][ 10-bit ]
+(sign bit)(timestamp)(machine id)(sequence)
+```
+
+| Field      | Space          |
+| ---------- | -------------- |
+| sign bit   | 1 (always `0`) |
+| timestamp  | 139 years      |
+| machine id | 1024 machines  |
+| sequence   | 2048 ids       |
+
+```js
+import { uniqid } from '@wal-li/core';
+
+uniqid();
+
+uniqid.machine = 6;
+uniqid.epoch = +new Date();
+
+uniqid();
+```
+
 ### Server
 
 **Create**
