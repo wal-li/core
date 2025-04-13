@@ -1,4 +1,4 @@
-import { joinPath, merge, pathToRegexp, parseQuery, isPlainObject, isObject } from '../src/utils';
+import { joinPath, merge, pathToRegexp, parseQuery, isPlainObject, isObject, interpolate } from '../src/utils';
 
 describe('Utils test', () => {
   it('should join path', async () => {
@@ -216,5 +216,55 @@ describe('isObject', () => {
 
   it('should return false for functions', () => {
     expect(isObject(() => {})).toBe(false); // Function
+  });
+});
+
+describe('interpolate', () => {
+  it('should replace variables with correct values', () => {
+    const template = 'Hello, my name is {name} and I am {age} years old.';
+    const variables = { name: 'Alice', age: 30 };
+
+    const result = interpolate(template, variables);
+    expect(result).toBe('Hello, my name is Alice and I am 30 years old.');
+  });
+
+  it('should return empty string for missing variables', () => {
+    const template = 'Hello, my name is {name} and I am {age} years old.';
+    const variables = { name: 'Alice' }; // age is missing
+
+    const result = interpolate(template, variables);
+    expect(result).toBe('Hello, my name is Alice and I am  years old.');
+  });
+
+  it('should return the template if no variables are provided', () => {
+    const template = 'Hello, my name is {name} and I am {age} years old.';
+    const variables = {};
+
+    const result = interpolate(template, variables);
+    expect(result).toBe('Hello, my name is  and I am  years old.');
+  });
+
+  it('should handle empty template string', () => {
+    const template = '';
+    const variables = { name: 'Alice', age: 30 };
+
+    const result = interpolate(template, variables);
+    expect(result).toBe('');
+  });
+
+  it('should handle missing curly braces', () => {
+    const template = 'Hello, my name is name and I am age years old.';
+    const variables = { name: 'Alice', age: 30 };
+
+    const result = interpolate(template, variables);
+    expect(result).toBe('Hello, my name is name and I am age years old.');
+  });
+
+  it('should handle complex expressions inside variables', () => {
+    const template = 'The result of 2 + 2 is {result}.';
+    const variables = { result: 2 + 2 };
+
+    const result = interpolate(template, variables);
+    expect(result).toBe('The result of 2 + 2 is 4.');
   });
 });

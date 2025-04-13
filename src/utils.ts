@@ -114,3 +114,22 @@ export function parseQuery(query: URLSearchParams | string) {
 
   return res;
 }
+
+/**
+ * Interpolates a template string by replacing placeholders with corresponding values from the provided variables.
+ * Placeholders in the template should be enclosed in `{}` (e.g., `{variableName}`).
+ * If a placeholder does not have a corresponding value in the variables object, it will be replaced with an empty string.
+ *
+ * @param {string} template - The template string containing placeholders to be replaced.
+ * @param {Record<string, any>} variables - An object containing key-value pairs to replace placeholders in the template.
+ * @returns {string} - The resulting string with placeholders replaced by corresponding values.
+ *
+ * @example
+ * const result = interpolate('Hello, my name is {name} and I am {age} years old.', { name: 'Alice', age: 30 });
+ * console.log(result); // "Hello, my name is Alice and I am 30 years old."
+ */
+export function interpolate(template: string, variables: Record<string, any>): string {
+  return template.replace(/\{(.*?)\}/g, (_, key) => {
+    return key in variables ? variables[key] : '';
+  });
+}
