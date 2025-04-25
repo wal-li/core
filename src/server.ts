@@ -11,6 +11,7 @@ import { ReasonPhrases } from './constants';
 import { Start, Stop } from './decorators';
 import { isPlainObject, parseQuery, pathToRegexp } from './utils';
 import { Logger } from './logger';
+import { colors } from './colors';
 
 const HOST_ENV = '@.host';
 const PORT_ENV = '@.port';
@@ -168,9 +169,13 @@ const simpleParseForm = new ServerPlugin({
 const httpLogger = new ServerPlugin({
   async before({ res, input }: any) {
     const startTime = +new Date();
-    input.logs = [input.method.toUpperCase()];
+    input.logs = [colors.blue(input.method.toUpperCase())];
     res.on('close', () => {
-      input.logs.push(res.statusCode, input.path + input.url.search, +new Date() - startTime + 'ms');
+      input.logs.push(
+        colors.magenta(res.statusCode),
+        input.path + input.url.search,
+        colors.yellow(+new Date() - startTime, 'ms'),
+      );
       (this as any).logger.http(input.logs.join(' '));
     });
   },

@@ -1,4 +1,4 @@
-import { StatusCode } from './enums';
+import { ColorCode, StatusCode } from './enums';
 
 export const ReasonPhrases = {
   [StatusCode.ACCEPTED]: 'Accepted',
@@ -59,4 +59,54 @@ export const ReasonPhrases = {
   [StatusCode.UNSUPPORTED_MEDIA_TYPE]: 'Unsupported Media Type',
   [StatusCode.USE_PROXY]: 'Use Proxy',
   [StatusCode.MISDIRECTED_REQUEST]: 'Misdirected Request',
+};
+
+export const ColorCodes = {
+  [ColorCode.reset]: [0, 0],
+
+  [ColorCode.bold]: [1, 22],
+  [ColorCode.dim]: [2, 22],
+  [ColorCode.italic]: [3, 23],
+  [ColorCode.underline]: [4, 24],
+  [ColorCode.inverse]: [7, 27],
+  [ColorCode.hidden]: [8, 28],
+  [ColorCode.strikethrough]: [9, 29],
+
+  [ColorCode.black]: [30, 39],
+  [ColorCode.red]: [31, 39],
+  [ColorCode.green]: [32, 39],
+  [ColorCode.yellow]: [33, 39],
+  [ColorCode.blue]: [34, 39],
+  [ColorCode.magenta]: [35, 39],
+  [ColorCode.cyan]: [36, 39],
+  [ColorCode.white]: [37, 39],
+  [ColorCode.gray]: [90, 39],
+  [ColorCode.grey]: [90, 39],
+
+  [ColorCode.brightRed]: [91, 39],
+  [ColorCode.brightGreen]: [92, 39],
+  [ColorCode.brightYellow]: [93, 39],
+  [ColorCode.brightBlue]: [94, 39],
+  [ColorCode.brightMagenta]: [95, 39],
+  [ColorCode.brightCyan]: [96, 39],
+  [ColorCode.brightWhite]: [97, 39],
+
+  [ColorCode.bgBlack]: [40, 49],
+  [ColorCode.bgRed]: [41, 49],
+  [ColorCode.bgGreen]: [42, 49],
+  [ColorCode.bgYellow]: [43, 49],
+  [ColorCode.bgBlue]: [44, 49],
+  [ColorCode.bgMagenta]: [45, 49],
+  [ColorCode.bgCyan]: [46, 49],
+  [ColorCode.bgWhite]: [47, 49],
+  [ColorCode.bgGray]: [100, 49],
+  [ColorCode.bgGrey]: [100, 49],
+
+  [ColorCode.bgBrightRed]: [101, 49],
+  [ColorCode.bgBrightGreen]: [102, 49],
+  [ColorCode.bgBrightYellow]: [103, 49],
+  [ColorCode.bgBrightBlue]: [104, 49],
+  [ColorCode.bgBrightMagenta]: [105, 49],
+  [ColorCode.bgBrightCyan]: [106, 49],
+  [ColorCode.bgBrightWhite]: [107, 49],
 };
