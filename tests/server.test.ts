@@ -199,6 +199,21 @@ describe('Server test', () => {
     await server.stop();
   });
 
+  it('should return number', async () => {
+    const server = new Server('0.0.0.0', 8080);
+
+    server.addRoute(Method.GET, '/', ({}) => {
+      return 123;
+    });
+
+    await server.start();
+
+    const res = await request(server.address).get('/');
+    expect(res).toHaveProperty('text', '123');
+
+    await server.stop();
+  });
+
   it('should catch-all', async () => {
     const server = new Server('0.0.0.0', 8080);
 

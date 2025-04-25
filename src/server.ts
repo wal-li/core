@@ -61,16 +61,16 @@ class Response {
     if (this.body instanceof Error) {
       this.status ??= StatusCode.INTERNAL_SERVER_ERROR;
       this.body = body.message;
+    } else if (isPlainObject(body) || Array.isArray(body)) {
+      this.body = JSON.stringify(body);
+      this.headers['content-type'] = MimeType.JSON;
+    } else if (body !== undefined && body !== null && !(body instanceof Buffer) && !(body instanceof Uint8Array)) {
+      this.body = `${body}`;
     }
 
     if (this.status === undefined) this.status = this.body === undefined ? StatusCode.NOT_FOUND : StatusCode.OK;
 
     if (this.status !== undefined && this.body === undefined) this.body = ReasonPhrases[this.status];
-
-    if (isPlainObject(body) || Array.isArray(body)) {
-      this.body = JSON.stringify(body);
-      this.headers['content-type'] = MimeType.JSON;
-    }
 
     if (isPlainObject(headers)) for (const name in headers) this.headers[name] = headers[name];
   }
@@ -498,3 +498,5 @@ export {
   simpleParseForm,
   httpLogger,
 };
+
+export type { Request };
