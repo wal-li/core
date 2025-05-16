@@ -29,11 +29,11 @@ type Request = {
   url: URL;
   method: Method;
   path: string;
-  query: object;
-  params: object;
-  fields: any;
-  files: any;
-  headers: any;
+  query: Record<string, any>;
+  params: Record<string, any>;
+  fields?: Record<string, any>;
+  files?: Record<string, any>;
+  headers?: Record<string, any>;
 };
 
 class HeaderMap {
@@ -149,19 +149,22 @@ const simpleParseForm = new ServerPlugin({
       });
       req.on('error', (err: any) => reject(err));
       req.on('end', () => {
-        if (contentType === MimeType.JSON) {
+        const reqBody = Buffer.concat(chunks).toString();
+
+        if (reqBody && contentType === MimeType.JSON) {
           try {
-            resolve(JSON.parse(Buffer.concat(chunks).toString()));
+            resolve(JSON.parse(reqBody));
           } catch (err) {
             reject(err);
           }
-        } else if (contentType === MimeType.URLENCODED) {
-          resolve(parseQuery(Buffer.concat(chunks).toString()));
+        } else if (reqBody && contentType === MimeType.URLENCODED) {
+          resolve(parseQuery(reqBody));
         } else {
-          resolve(Buffer.concat(chunks).toString());
+          resolve(reqBody);
         }
       });
     });
+    input.body = body;
     if (isPlainObject(body)) input.fields = body;
   },
 });
@@ -431,12 +434,10 @@ class Server {
    */
   addRoute(method: Method, ...args: (string | Function)[]) {
     const paths: RegExp[] = [];
-    const docPaths: string[] = [];
     const fns: Function[] = [];
     for (const item of args) {
       if (typeof item === 'string') {
         paths.push(pathToRegexp(item));
-        docPaths.push(item);
       } else fns.push(item);
     }
     this.routes.push({ method, paths, fns });

@@ -360,4 +360,21 @@ describe('Server test', () => {
     await server.start();
     await server.stop();
   });
+
+  it('should send content type request', async () => {
+    const server = new Server('0.0.0.0', 8080);
+
+    server.use(simpleParseForm);
+
+    server.addRoute(Method.GET, '/foo', ({ res }) => {
+      return 'this';
+    });
+
+    await server.start();
+
+    const res = await request(server.address).get('/foo').set('Content-Type', 'application/json');
+    expect(res).toHaveProperty('text', 'this');
+
+    await server.stop();
+  });
 });

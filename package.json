@@ -1,6 +1,6 @@
 {
   "name": "@wal-li/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "commonjs",
@@ -37,6 +37,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
+    "isolated-vm": "^5.0.4",
     "reflect-metadata": "^0.2.2"
   }
 }

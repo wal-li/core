@@ -17,12 +17,11 @@ export function isObject(item: any) {
  * @param {any} item - The value to check.
  * @returns {boolean} - Returns `true` if the item is a plain object, otherwise `false`.
  */
-export function isPlainObject(item: any) {
-  return (
-    !!item && // excludes null, undefined
-    typeof item === 'object' && // excludes NaN
-    [undefined, Object, Function].includes(item.constructor) // allows object, Object.create(...) and excludes any Constructor
-  );
+export function isPlainObject(item: any): boolean {
+  if (typeof item !== 'object' || item === null) return false;
+
+  const proto = Object.getPrototypeOf(item);
+  return proto === null || proto === Object.prototype;
 }
 
 /**
