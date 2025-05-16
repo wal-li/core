@@ -37,7 +37,6 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "isolated-vm": "^5.0.4",
     "reflect-metadata": "^0.2.2"
   }
 }

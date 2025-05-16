@@ -102,43 +102,6 @@ TBD
   - If the path is `/abc`, the `slug` will be `undefined`.
   - If the path is `/abc/`, the `slug` will be empty (`''`);
 
-### VM
-
-`Vm` is a class that allows you to create a Node.js virtual environment with basic controls.
-
-```ts
-import { Vm } from '@wal-li/core';
-
-await Vm.execute(
-  `
-  exports.handler = async function({ name }) {
-    return "Hello, " + name + "!";
-  }
-`,
-  { name: 'World' },
-);
-
-// Hello, World
-```
-
-Notes:
-
-- This `Vm` is not a security mechanism. **Do not use it to run untrusted code**.
-- It is a combination of node:worker_threads (for parallel execution) and vm (for sandboxing).
-- Consider using `isolated-vm` or `docker` to run untrusted code.
-
-Allowed in the global:
-
-- `clearInterval`
-- `clearTimeout`
-- `setInterval`
-- `setTimeout`
-- `structuredClone`
-- `atob`
-- `btoa`
-- `fetch`
-- `crypto`
-
 ## FAQ
 
 ### Why not using `vitest`?
