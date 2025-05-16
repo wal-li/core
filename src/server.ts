@@ -9,7 +9,7 @@ import { Inject, Injectable } from './di';
 import { Method, MimeType, StatusCode } from './enums';
 import { ReasonPhrases } from './constants';
 import { Start, Stop } from './decorators';
-import { isPlainObject, parseQuery, pathToRegexp } from './utils';
+import { isObject, isPlainObject, parseQuery, pathToRegexp } from './utils';
 import { Logger } from './logger';
 import { colors } from './colors';
 
@@ -62,7 +62,7 @@ class Response {
     if (this.body instanceof Error) {
       this.status ??= StatusCode.INTERNAL_SERVER_ERROR;
       this.body = body.message;
-    } else if (isPlainObject(body) || Array.isArray(body)) {
+    } else if (isObject(body) || Array.isArray(body)) {
       this.body = JSON.stringify(body);
       this.headers['content-type'] = MimeType.JSON;
     } else if (body !== undefined && body !== null && !(body instanceof Buffer) && !(body instanceof Uint8Array)) {
@@ -73,7 +73,7 @@ class Response {
 
     if (this.status !== undefined && this.body === undefined) this.body = ReasonPhrases[this.status];
 
-    if (isPlainObject(headers)) for (const name in headers) this.headers[name] = headers[name];
+    if (isObject(headers)) for (const name in headers) this.headers[name] = headers[name];
   }
 }
 
