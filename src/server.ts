@@ -9,9 +9,10 @@ import { Inject, Injectable } from './di';
 import { Method, MimeType, StatusCode } from './enums';
 import { ReasonPhrases } from './constants';
 import { Start, Stop } from './decorators';
-import { isObject, isPlainObject, parseQuery, pathToRegexp } from './utils';
+import { isObject, isPlainObject, merge, parseQuery, pathToRegexp } from './utils';
 import { Logger } from './logger';
 import { colors } from './colors';
+import { type PlainObject } from './types';
 
 const HOST_ENV = '@.host';
 const PORT_ENV = '@.port';
@@ -23,6 +24,7 @@ type Route = {
   method: Method;
   paths: RegExp[];
   fns: Function[];
+  baseInput: PlainObject;
 };
 
 type Request = {
@@ -365,7 +367,9 @@ class Server {
       for (const [route, params] of routes) {
         input.params = params;
         for (const fn of route.fns) {
-          output = await fn(input);
+          const nextInput = merge({}, route.baseInput, input);
+          output = await fn(nextInput);
+          merge(input, nextInput);
           if (output !== undefined) break;
         }
         if (output !== undefined) break;
@@ -432,15 +436,18 @@ class Server {
    * @param method - The HTTP method (GET, POST, etc.).
    * @param args - Route path(s) and handler function(s).
    */
-  addRoute(method: Method, ...args: (string | Function)[]) {
+  addRoute(method: Method, ...args: (string | Function | object)[]) {
     const paths: RegExp[] = [];
     const fns: Function[] = [];
+    const baseInput: PlainObject = {};
+
     for (const item of args) {
       if (typeof item === 'string') {
         paths.push(pathToRegexp(item));
-      } else fns.push(item);
+      } else if (isPlainObject(item)) merge(baseInput, item);
+      else if (typeof item === 'function') fns.push(item);
     }
-    this.routes.push({ method, paths, fns });
+    this.routes.push({ method, paths, fns, baseInput });
   }
 
   /**

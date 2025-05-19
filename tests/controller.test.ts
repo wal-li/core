@@ -1,6 +1,6 @@
 import request from 'supertest';
 
-import { Controller, Get, Middleware, Start, Stop } from '../src/decorators';
+import { Controller, Get, Input, Middleware, Start, Stop } from '../src/decorators';
 import { Container, Injectable } from '../src/di';
 import { BaseController } from '../src/controller';
 import { Server } from '../src/server';
@@ -8,12 +8,11 @@ import { Method } from '../src/enums';
 
 describe('Controller test', () => {
   it('shoult create a simple controller', async () => {
-    // define
     @Controller()
     class SimpleController extends BaseController {
       @Get('/')
-      hello() {
-        return 'hello, world';
+      hello({ controller }) {
+        return `hello, world from ${controller.method}-${controller.name}`;
       }
     }
 
@@ -27,7 +26,7 @@ describe('Controller test', () => {
     await container.execute(Start);
 
     const res = await request(server.address).get('/');
-    expect(res).toHaveProperty('text', 'hello, world');
+    expect(res).toHaveProperty('text', 'hello, world from hello-SimpleController');
     expect(res).toHaveProperty('status', 200);
 
     await container.execute(Stop);
@@ -70,7 +69,7 @@ describe('Controller test', () => {
     await container.execute(Stop);
   });
 
-  it('should create a nested controller', async () => {});
+  // it('should create a nested controller', async () => {});
 
   it('should create a controller with alternative server', async () => {
     // define
@@ -104,6 +103,31 @@ describe('Controller test', () => {
     const res = await request(server.address).get('/');
     expect(res).toHaveProperty('text', 'hello, world');
     expect(res).toHaveProperty('status', 200);
+
+    await container.execute(Stop);
+  });
+
+  it('should use base input', async () => {
+    @Controller()
+    class SimpleController extends BaseController {
+      @Get('/', '/[name]')
+      @Input({ params: { name: 'foo' } })
+      hello({ params }) {
+        return `hello, ${params.name}`;
+      }
+    }
+
+    // server
+    const container = new Container();
+
+    container.register(SimpleController);
+
+    const server: Server = container.resolve<Server>(Server);
+
+    await container.execute(Start);
+
+    expect(await request(server.address).get('/')).toHaveProperty('text', 'hello, foo');
+    expect(await request(server.address).get('/bar')).toHaveProperty('text', 'hello, bar');
 
     await container.execute(Stop);
   });

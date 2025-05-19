@@ -39,5 +39,6 @@ Middleware.key = middlewareSymbol;
 
 // mvc
 const Controller = Container.createDecorator();
+const Input = Container.createDecorator();
 
-export { Start, Stop, Get, Post, Put, Patch, Delete, All, HttpDecorators, Middleware, Controller };
+export { Start, Stop, Get, Post, Put, Patch, Delete, All, HttpDecorators, Middleware, Controller, Input };
