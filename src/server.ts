@@ -9,7 +9,7 @@ import { Inject, Injectable } from './di';
 import { Method, MimeType, StatusCode } from './enums';
 import { ReasonPhrases } from './constants';
 import { Start, Stop } from './decorators';
-import { isObject, isPlainObject, merge, parseQuery, pathToRegexp } from './utils';
+import { isObject, isPlainObject, merge, mergeObject, parseQuery, pathToRegexp } from './utils';
 import { Logger } from './logger';
 import { colors } from './colors';
 import { type PlainObject } from './types';
@@ -368,7 +368,7 @@ class Server {
       for (const [route, params] of routes) {
         input.params = params;
         for (const fn of route.fns) {
-          (input as any) = merge({}, route.baseInput, input);
+          (input as any) = mergeObject({}, route.baseInput, input);
           output = await fn(input);
           if (output !== undefined) break;
         }

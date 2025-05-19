@@ -34,7 +34,7 @@ export function isPlainObject(item: any): boolean {
 }
 
 /**
- * Deeply merges multiple source objects into a target object.
+ * Deeply merges multiple source objects into a target object - include array.
  *
  * @param {any} target - The target object to merge properties into.
  * @param {...any[]} sources - One or more source objects to merge from.
@@ -54,6 +54,35 @@ export function merge(target: any, ...sources: any[]) {
           merge(target[key], sourceValue);
         } else if (Array.isArray(sourceValue)) {
           target[key] = Array.isArray(targetValue) ? targetValue.concat(sourceValue) : [...sourceValue];
+        } else {
+          target[key] = sourceValue;
+        }
+      }
+    }
+  }
+
+  return target;
+}
+
+/**
+ * Deeply merges multiple source objects into a target object - only object.
+ *
+ * @param {any} target - The target object to merge properties into.
+ * @param {...any[]} sources - One or more source objects to merge from.
+ * @returns {any} - The merged target object.
+ */
+export function mergeObject(target: any, ...sources: any[]) {
+  if (!sources.length) return target;
+
+  for (const source of sources) {
+    if (isPlainObject(target) && isPlainObject(source)) {
+      for (const key in source) {
+        const sourceValue = source[key];
+        const targetValue = target[key];
+
+        if (isPlainObject(sourceValue)) {
+          target[key] = isPlainObject(targetValue) ? targetValue : {};
+          merge(target[key], sourceValue);
         } else {
           target[key] = sourceValue;
         }
