@@ -1,5 +1,8 @@
 import path from 'node:path';
 
+const OBJECT_STRING = {}.toString();
+const CTOR_STRING = Object.toString();
+
 /**
  * Checks if the provided value is an object (excluding arrays and null).
  *
@@ -7,7 +10,7 @@ import path from 'node:path';
  * @returns {boolean} Returns `true` if the item is a non-null object, otherwise `false`.
  */
 export function isObject(item: any) {
-  return !!item && typeof item === 'object' && !Array.isArray(item);
+  return item != null && typeof item == 'object' && Object.prototype.toString.call(item) == OBJECT_STRING;
 }
 
 /**
@@ -18,10 +21,16 @@ export function isObject(item: any) {
  * @returns {boolean} - Returns `true` if the item is a plain object, otherwise `false`.
  */
 export function isPlainObject(item: any): boolean {
-  if (typeof item !== 'object' || item === null) return false;
+  // not object-like null/undefined, not object returns a string
+  if (!isObject(item)) return false;
 
+  // the object is from Object.create(null)
   const proto = Object.getPrototypeOf(item);
-  return proto === null || proto === Object.prototype;
+  if (proto === null) return true;
+
+  // an object created with the base Object constructor, for example: {} or new Object()
+  const Ctor = Object.prototype.hasOwnProperty.call(proto, 'constructor') && proto.constructor;
+  return typeof Ctor == 'function' && Ctor instanceof Ctor && Ctor.toString() == CTOR_STRING;
 }
 
 /**
@@ -33,25 +42,26 @@ export function isPlainObject(item: any): boolean {
  */
 export function merge(target: any, ...sources: any[]) {
   if (!sources.length) return target;
-  const source = sources.shift();
 
-  if (isPlainObject(target) && isPlainObject(source)) {
-    for (const key in source) {
-      if (isPlainObject(source[key])) {
-        if (!target[key]) Object.assign(target, { [key]: {} });
-        if (!isPlainObject(target[key])) throw new Error(`Cannot merge source object with target in ${key}`);
-        merge(target[key], source[key]);
-      } else if (Array.isArray(source[key])) {
-        if (!target[key]) Object.assign(target, { [key]: [] });
-        if (!Array.isArray(target[key])) throw new Error(`Cannot merge source array with target in ${key}`);
-        target[key] = target[key].concat(source[key]);
-      } else {
-        Object.assign(target, { [key]: source[key] });
+  for (const source of sources) {
+    if (isPlainObject(target) && isPlainObject(source)) {
+      for (const key in source) {
+        const sourceValue = source[key];
+        const targetValue = target[key];
+
+        if (isPlainObject(sourceValue)) {
+          target[key] = isPlainObject(targetValue) ? targetValue : {};
+          merge(target[key], sourceValue);
+        } else if (Array.isArray(sourceValue)) {
+          target[key] = Array.isArray(targetValue) ? targetValue.concat(sourceValue) : [...sourceValue];
+        } else {
+          target[key] = sourceValue;
+        }
       }
     }
   }
 
-  return merge(target, ...sources);
+  return target;
 }
 
 /**

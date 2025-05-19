@@ -44,16 +44,16 @@ describe('merge', () => {
     expect(merge(target, source1, source2)).toEqual({ a: 1, b: 2, c: 3 });
   });
 
-  it('should throws if trying to merge object into non-object', () => {
+  it('should merge object into non-object', () => {
     const target = { a: 1 };
     const source = { a: { b: 2 } }; // trying to merge object into number
-    expect(() => merge(target, source)).toThrow('Cannot merge source object with target in a');
+    expect(merge(target, source)).toEqual({ a: { b: 2 } });
   });
 
-  it('should throws if trying to merge array into non-array', () => {
+  it('should merge array into non-array', () => {
     const target = { a: 1 };
     const source = { a: [1, 2] }; // trying to merge array into number
-    expect(() => merge(target, source)).toThrow('Cannot merge source array with target in a');
+    expect(merge(target, source)).toEqual({ a: [1, 2] });
   });
 
   it('should creates new objects/arrays if not present in target', () => {
@@ -75,13 +75,17 @@ describe('merge', () => {
       c: { d: 2 },
     });
 
-    expect(() => merge({ a: 1, b: {}, c: { d: 1 } }, { a: 2, b: [1, 2] }, { b: [3] }, { c: { d: 2 } })).toThrow(
-      'Cannot merge source array with target in b',
-    );
+    expect(merge({ a: 1, b: {}, c: { d: 1 } }, { a: 2, b: [1, 2] }, { b: [3] }, { c: { d: 2 } })).toEqual({
+      a: 2,
+      b: [1, 2, 3],
+      c: { d: 2 },
+    });
 
-    expect(() => merge({ a: 1, c: { d: 1 } }, { a: 2, b: [1, 2] }, { b: [3] }, { c: { d: {} } })).toThrow(
-      'Cannot merge source object with target in d',
-    );
+    expect(merge({ a: 1, c: { d: 1 } }, { a: 2, b: [1, 2] }, { b: [3] }, { c: { d: {} } })).toEqual({
+      a: 2,
+      b: [1, 2, 3],
+      c: { d: {} },
+    });
   });
 });
 
