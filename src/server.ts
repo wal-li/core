@@ -174,9 +174,10 @@ const simpleParseForm = new ServerPlugin({
 const httpLogger = new ServerPlugin({
   async before({ res, input }: any) {
     const startTime = +new Date();
-    input.logs = [colors.blue(input.method.toUpperCase())];
+    input.logs = [];
     res.on('close', () => {
       input.logs.push(
+        colors.blue(input.method.toUpperCase()),
         colors.magenta(res.statusCode),
         input.path + input.url.search,
         colors.yellow(+new Date() - startTime, 'ms'),
@@ -367,9 +368,8 @@ class Server {
       for (const [route, params] of routes) {
         input.params = params;
         for (const fn of route.fns) {
-          const nextInput = merge({}, route.baseInput, input);
-          output = await fn(nextInput);
-          merge(input, nextInput);
+          (input as any) = merge({}, route.baseInput, input);
+          output = await fn(input);
           if (output !== undefined) break;
         }
         if (output !== undefined) break;
