@@ -78,7 +78,7 @@ async function createKey(secret: string, salt: any) {
     {
       name: 'PBKDF2',
       salt: new TextEncoder().encode(salt),
-      iterations: 1000,
+      iterations: 1000000,
       hash: 'SHA-256',
     },
     keyMaterial,
